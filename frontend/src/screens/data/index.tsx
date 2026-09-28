@@ -89,7 +89,7 @@ function PickBar() {
         Cancel
       </Button>
       <Button variant="primary" disabled={count === 0} onClick={() => back(true)}>
-        Done → Return to {labName}
+        Done - Return to {labName}
       </Button>
     </div>
   )

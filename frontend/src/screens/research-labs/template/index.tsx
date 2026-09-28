@@ -217,7 +217,7 @@ export function TemplateLabScreen() {
         title={
           <div className="flex flex-wrap items-center gap-2.5">
             <span>Formula Templates</span>
-            <Badge tone="neutral">📐 Parametric Templates • Local & Free</Badge>
+            <Badge tone="neutral">Parametric Templates • Local & Free</Badge>
           </div>
         }
         description="Systematically slots candidate data fields and operators into visual formula templates across customizable time windows."

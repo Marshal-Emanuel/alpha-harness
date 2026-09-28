@@ -117,7 +117,7 @@ export function PowerPoolLabScreen() {
         title={
           <div className="flex flex-wrap items-center gap-2.5">
             <span>AI Strategy Generator</span>
-            <Badge tone="warn">🧠 AI / LLM Agent • Requires Key</Badge>
+            <Badge tone="warn">AI / LLM Agent • Requires Key</Badge>
           </div>
         }
         description="Autonomous quantitative strategy generator powered by frontier LLMs (Gemini / OpenAI). Uses financial reasoning and domain constraints to write novel alpha expressions."

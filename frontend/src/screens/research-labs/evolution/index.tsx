@@ -259,7 +259,7 @@ export function EvolutionLabScreen() {
         title={
           <div className="flex flex-wrap items-center gap-2.5">
             <span>Alpha Breeding (Genetic)</span>
-            <Badge tone="outline">🧬 Genetic Algorithm • Local & Free</Badge>
+            <Badge tone="outline">Genetic Algorithm • Local & Free</Badge>
           </div>
         }
         description="Breeds, splices, and mutates high-performing seed alphas using AST crossover and train/test fitness scoring to generate robust descendants."

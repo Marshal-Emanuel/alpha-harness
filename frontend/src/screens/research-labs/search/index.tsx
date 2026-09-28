@@ -80,7 +80,7 @@ export function SearchLabScreen() {
         title={
           <div className="flex flex-wrap items-center gap-2.5">
             <span>Math Formula Search</span>
-            <Badge tone="profit">⚙️ Local Math Engine • 100% Free</Badge>
+            <Badge tone="profit">Local Math Engine • 100% Free</Badge>
           </div>
         }
         description="Offline algorithmic formula search. Combines mathematical operator trees and field candidates using Bayesian optimization (TPE) without requiring any external LLM or API keys."
