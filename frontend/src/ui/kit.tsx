@@ -11,7 +11,7 @@ import { RadioGroup } from '@base-ui/react/radio-group'
 import { Toggle } from '@base-ui/react/toggle'
 import { ToggleGroup } from '@base-ui/react/toggle-group'
 import { useRender } from '@base-ui/react/use-render'
-import { createLink } from '@tanstack/react-router'
+import { Link, createLink } from '@tanstack/react-router'
 import {
   CheckIcon,
   ChevronRightIcon,
@@ -58,6 +58,47 @@ export const checkTone = (result: CheckResult | null | undefined): Tone =>
 
 // ── Layout ──────────────────────────────────────────────────────────────────────────────
 
+export interface BreadcrumbItem {
+  label: string
+  to?: string
+}
+
+export function Breadcrumbs({
+  items,
+  className,
+}: {
+  items: BreadcrumbItem[]
+  className?: string
+}) {
+  if (!items.length) return null
+  return (
+    <nav aria-label="Breadcrumb" className={cn('flex flex-wrap items-center gap-1.5 text-body-compact', className)}>
+      {items.map((item, i) => {
+        const isLast = i === items.length - 1
+        return (
+          <Fragment key={`${item.label}-${i}`}>
+            {i > 0 && (
+              <ChevronRightIcon className="size-3 shrink-0 text-ink-tertiary" aria-hidden />
+            )}
+            {item.to && !isLast ? (
+              <Link
+                to={item.to}
+                className="text-ink-subtle transition-colors hover:text-ink focus-visible:-outline-offset-2"
+              >
+                {item.label}
+              </Link>
+            ) : (
+              <span className={cn(isLast ? 'font-medium text-ink' : 'text-ink-subtle')}>
+                {item.label}
+              </span>
+            )}
+          </Fragment>
+        )
+      })}
+    </nav>
+  )
+}
+
 /** A screen's root: the canvas shows through the gaps as the gutter. */
 export function Page({ children, className }: { children: ReactNode; className?: string }) {
   return <div className={cn('flex min-w-0 flex-col gap-4 p-3 lg:p-4', className)}>{children}</div>
@@ -67,14 +108,17 @@ export function PageHeader({
   title,
   description,
   actions,
+  breadcrumbs,
 }: {
   title: ReactNode
   description?: ReactNode
   actions?: ReactNode
+  breadcrumbs?: BreadcrumbItem[]
 }) {
   return (
     <header className="flex flex-wrap items-end justify-between gap-3 px-1 pt-1">
-      <div className="flex min-w-0 flex-col gap-1">
+      <div className="flex min-w-0 flex-col gap-1.5">
+        {breadcrumbs && breadcrumbs.length > 0 && <Breadcrumbs items={breadcrumbs} />}
         <h1 className="text-headline text-balance break-words font-semibold text-ink">{title}</h1>
         {description && (
           <p className="max-w-3xl text-body text-pretty break-words text-ink-subtle">

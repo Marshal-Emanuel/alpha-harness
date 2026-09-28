@@ -34,7 +34,9 @@ import {
 } from '@/screens/research-labs/template/api'
 import type { Blocks, TemplateDoc } from '@/screens/research-labs/template/tree'
 import {
+  Badge,
   Button,
+  Disclosure,
   Empty,
   ErrorNotice,
   Field,
@@ -208,7 +210,17 @@ export function TemplateLabScreen() {
   return (
     <Page>
       <PageHeader
-        title="Template Lab"
+        breadcrumbs={[
+          { label: 'Alpha Generators', to: '/labs' },
+          { label: 'Formula Templates' },
+        ]}
+        title={
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span>Formula Templates</span>
+            <Badge tone="neutral">📐 Parametric Templates • Local & Free</Badge>
+          </div>
+        }
+        description="Systematically slots candidate data fields and operators into visual formula templates across customizable time windows."
         actions={
           <>
             {saved !== null && (
@@ -254,6 +266,27 @@ export function TemplateLabScreen() {
           </>
         }
       />
+      <Disclosure summary="Read more: How Formula Templates works & block builder guide">
+        <div className="flex flex-col gap-2.5 text-body-compact text-ink-subtle">
+          <p>
+            <strong className="text-ink">Block-Based Quant Templates:</strong> Build or load parameterized expression skeletons with customizable operator slots, lookback days, and dataset field placeholders. The engine exhaustively or stochastically explores all valid combinations.
+          </p>
+          <div className="my-1 grid grid-cols-1 gap-3 md:grid-cols-3">
+            <div className="rounded-md border border-hairline bg-surface-1 p-2.5">
+              <span className="mb-0.5 block font-medium text-ink">1. Template Presets</span>
+              Includes classic quantitative patterns like Mean Reversion, Momentum, Volume Breakout, and Cross-Sectional Spreads.
+            </div>
+            <div className="rounded-md border border-hairline bg-surface-1 p-2.5">
+              <span className="mb-0.5 block font-medium text-ink">2. Multi-Operator Sweep</span>
+              Allows swapping time-series operators (ts_decay_linear, ts_zscore, ts_delta) and sweeping decay days.
+            </div>
+            <div className="rounded-md border border-hairline bg-surface-1 p-2.5">
+              <span className="mb-0.5 block font-medium text-ink">3. Local Permutations</span>
+              Runs 100% locally and queues the best structural candidates directly to Live Simulation Slots.
+            </div>
+          </div>
+        </div>
+      </Disclosure>
       {options.isError && (
         <ErrorNotice error={options.error} title="Could not read your operators" />
       )}

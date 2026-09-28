@@ -22,7 +22,7 @@ import {
 } from '@/screens/research-labs/lab-task'
 import { type SearchLabRequest, searchLab } from '@/screens/research-labs/search/api'
 import { DatasetsPanel, SettingsPanel } from '@/screens/research-labs/task-settings'
-import { Button, ErrorNotice, Page, PageHeader } from '@/ui/kit'
+import { Badge, Button, Disclosure, ErrorNotice, Page, PageHeader } from '@/ui/kit'
 
 /** The Search Lab's choices, kept between visits. */
 const useSearchLab = create<LabDraft>()(
@@ -73,7 +73,17 @@ export function SearchLabScreen() {
   return (
     <Page>
       <PageHeader
-        title="Search Lab"
+        breadcrumbs={[
+          { label: 'Alpha Generators', to: '/labs' },
+          { label: 'Math Formula Search' },
+        ]}
+        title={
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span>Math Formula Search</span>
+            <Badge tone="profit">⚙️ Local Math Engine • 100% Free</Badge>
+          </div>
+        }
+        description="Offline algorithmic formula search. Combines mathematical operator trees and field candidates using Bayesian optimization (TPE) without requiring any external LLM or API keys."
         actions={
           <>
             {blocked && (
@@ -94,6 +104,29 @@ export function SearchLabScreen() {
           </>
         }
       />
+      <Disclosure summary="Read more: How Math Formula Search works & simulation guide">
+        <div className="flex flex-col gap-2.5 text-body-compact text-ink-subtle">
+          <p>
+            <strong className="text-ink">100% Local Combinatorics:</strong> This search engine operates entirely on your machine using Optuna's Tree-structured Parzen Estimator (TPE). It tests combinations of 1-operator and 2-operator mathematical formula shapes (e.g.{' '}
+            <code className="rounded bg-canvas px-1 py-0.5 font-mono text-xs text-ink">ts_decay_linear(rank(X), d)</code>,{' '}
+            <code className="rounded bg-canvas px-1 py-0.5 font-mono text-xs text-ink">group_neutralize(ts_delta(X, d), sector)</code>) across your chosen dataset fields.
+          </p>
+          <div className="my-1 grid grid-cols-1 gap-3 md:grid-cols-3">
+            <div className="rounded-md border border-hairline bg-surface-1 p-2.5">
+              <span className="mb-0.5 block font-medium text-ink">1. Zero API Costs</span>
+              Runs pure mathematical permutations locally; no LLM tokens or Gemini/OpenAI API keys are consumed.
+            </div>
+            <div className="rounded-md border border-hairline bg-surface-1 p-2.5">
+              <span className="mb-0.5 block font-medium text-ink">2. Steers on Sharpe</span>
+              Uses Bayesian optimization to adaptively sample operator parameters and decays that maximize WorldQuant Sharpe.
+            </div>
+            <div className="rounded-md border border-hairline bg-surface-1 p-2.5">
+              <span className="mb-0.5 block font-medium text-ink">3. Live Simulation Slots</span>
+              When started, expressions queue into background Tasks and run against WorldQuant's live simulation cluster.
+            </div>
+          </div>
+        </div>
+      </Disclosure>
       {options.isError && (
         <ErrorNotice error={options.error} title="Could not read your operators" />
       )}

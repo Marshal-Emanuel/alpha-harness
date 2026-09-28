@@ -29,10 +29,10 @@ export const AI_TABS = [
  *  than under the sidebar entry: four children under one item is most of the sidebar, and
  *  the screen already introduces them properly. */
 export const LAB_TABS = [
-  { tab: 'search', label: 'Search Lab', to: '/labs/search' },
-  { tab: 'template', label: 'Template Lab', to: '/labs/template' },
-  { tab: 'evolution', label: 'Evolution Lab', to: '/labs/evolution' },
-  { tab: 'power-pool', label: 'LLM Power Pool Lab', to: '/labs/power-pool' },
+  { tab: 'search', label: 'Math Formula Search', to: '/labs/search' },
+  { tab: 'power-pool', label: 'AI Strategy Generator', to: '/labs/power-pool' },
+  { tab: 'evolution', label: 'Alpha Breeding (Genetic)', to: '/labs/evolution' },
+  { tab: 'template', label: 'Formula Templates', to: '/labs/template' },
 ] as const
 
 /** The tools, each with its own route. Listed on the Tools screen and in ⌘K rather than
@@ -55,19 +55,19 @@ export const NAV = [
   {
     to: '/matrix',
     group: '',
-    label: 'Simulation Matrix',
+    label: 'Live Simulation Slots',
     icon: Grid3x3Icon,
   },
   {
     to: '/data',
     group: 'Research',
-    label: 'Data Explorer',
+    label: 'Datasets & Fields',
     icon: DatabaseIcon,
   },
   {
     to: '/labs',
     group: 'Research',
-    label: 'Research Labs',
+    label: 'Alpha Generators',
     icon: FlaskConicalIcon,
     tabs: LAB_TABS,
   },
@@ -87,7 +87,7 @@ export const NAV = [
   {
     to: '/pool',
     group: 'Results',
-    label: 'Alphas',
+    label: 'Alpha Vault',
     icon: LayersIcon,
     tabs: POOL_TABS,
   },

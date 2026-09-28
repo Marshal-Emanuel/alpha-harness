@@ -27,6 +27,7 @@ import {
 import { NeutralizationPicker } from '@/screens/research-labs/neutralization'
 import { CoresSetting, SimulationsSetting } from '@/screens/research-labs/task-settings'
 import {
+  Badge,
   Button,
   Disclosure,
   Empty,
@@ -251,7 +252,17 @@ export function EvolutionLabScreen() {
   return (
     <Page>
       <PageHeader
-        title="Evolution Lab"
+        breadcrumbs={[
+          { label: 'Alpha Generators', to: '/labs' },
+          { label: 'Alpha Breeding (Genetic)' },
+        ]}
+        title={
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span>Alpha Breeding (Genetic)</span>
+            <Badge tone="outline">🧬 Genetic Algorithm • Local & Free</Badge>
+          </div>
+        }
+        description="Breeds, splices, and mutates high-performing seed alphas using AST crossover and train/test fitness scoring to generate robust descendants."
         actions={
           <Button
             variant="primary"
@@ -264,6 +275,27 @@ export function EvolutionLabScreen() {
           </Button>
         }
       />
+      <Disclosure summary="Read more: How Alpha Breeding & Genetic Evolution works">
+        <div className="flex flex-col gap-2.5 text-body-compact text-ink-subtle">
+          <p>
+            <strong className="text-ink">Evolutionary Quant Synthesis:</strong> Select starting "seed" alphas from your Alpha Vault or auto-mine them from your simulation history. The engine parses their abstract syntax trees (ASTs), swaps functional sub-trees (crossover), and applies random parameter mutations.
+          </p>
+          <div className="my-1 grid grid-cols-1 gap-3 md:grid-cols-3">
+            <div className="rounded-md border border-hairline bg-surface-1 p-2.5">
+              <span className="mb-0.5 block font-medium text-ink">1. AST Crossover & Mutation</span>
+              Splices successful expression sub-trees together and mutates lookback windows or operators based on your mutation rate.
+            </div>
+            <div className="rounded-md border border-hairline bg-surface-1 p-2.5">
+              <span className="mb-0.5 block font-medium text-ink">2. Train / Test Split</span>
+              Children are simulated with an 8-year training and 2-year testing split to strictly guard against backtest overfitting.
+            </div>
+            <div className="rounded-md border border-hairline bg-surface-1 p-2.5">
+              <span className="mb-0.5 block font-medium text-ink">3. 100% Offline Generation</span>
+              Gene mutation runs entirely locally without LLM costs; only backtest simulations consume BRAIN API slots.
+            </div>
+          </div>
+        </div>
+      </Disclosure>
       {options.isError && (
         <ErrorNotice error={options.error} title="Could not load the lab's options" />
       )}

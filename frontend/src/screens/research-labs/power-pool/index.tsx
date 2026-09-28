@@ -21,6 +21,7 @@ import {
   SimulationsSetting,
 } from '@/screens/research-labs/task-settings'
 import {
+  Badge,
   Button,
   Disclosure,
   ErrorNotice,
@@ -109,7 +110,17 @@ export function PowerPoolLabScreen() {
   return (
     <Page>
       <PageHeader
-        title="LLM Power Pool Lab"
+        breadcrumbs={[
+          { label: 'Alpha Generators', to: '/labs' },
+          { label: 'AI Strategy Generator' },
+        ]}
+        title={
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span>AI Strategy Generator</span>
+            <Badge tone="warn">🧠 AI / LLM Agent • Requires Key</Badge>
+          </div>
+        }
+        description="Autonomous quantitative strategy generator powered by frontier LLMs (Gemini / OpenAI). Uses financial reasoning and domain constraints to write novel alpha expressions."
         actions={
           <Button
             variant="primary"
@@ -122,6 +133,27 @@ export function PowerPoolLabScreen() {
           </Button>
         }
       />
+      <Disclosure summary="Read more: How AI Strategy Generator works & key requirements">
+        <div className="flex flex-col gap-2.5 text-body-compact text-ink-subtle">
+          <p>
+            <strong className="text-ink">LLM-Driven Multi-Field Formulation:</strong> This lab prompts frontier models with the fields and metadata from your chosen datasets. Each LLM call synthesizes batches of 20 novel, syntactically valid WorldQuant FAST expressions designed with explicit market hypotheses.
+          </p>
+          <div className="my-1 grid grid-cols-1 gap-3 md:grid-cols-3">
+            <div className="rounded-md border border-hairline bg-surface-1 p-2.5">
+              <span className="mb-0.5 block font-medium text-ink">1. Model Configuration</span>
+              Requires an API key configured in <em>Settings › LLM Integration</em> (e.g. Gemini 2.5 Flash / GPT-4o).
+            </div>
+            <div className="rounded-md border border-hairline bg-surface-1 p-2.5">
+              <span className="mb-0.5 block font-medium text-ink">2. WorldQuant Constraints</span>
+              Alphas are constrained to ≤8 operators, ≤3 fields, valid universe & neutralization mappings, and decay exploration.
+            </div>
+            <div className="rounded-md border border-hairline bg-surface-1 p-2.5">
+              <span className="mb-0.5 block font-medium text-ink">3. Automatic Extraction</span>
+              The response parser extracts code blocks and queues batch simulation tasks directly into your Live Slots.
+            </div>
+          </div>
+        </div>
+      </Disclosure>
       {options.isError && <ErrorNotice error={options.error} title="Could not load the models" />}
       {options.isSuccess && models.length === 0 && (
         <Notice tone="warn" title="Add a Key in LLM Integration to use this lab." />
