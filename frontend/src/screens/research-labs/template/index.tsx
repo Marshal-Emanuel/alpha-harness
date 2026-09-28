@@ -6,6 +6,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
+  CircleAlertIcon,
   CopyPlusIcon,
   EllipsisIcon,
   FilePlusIcon,
@@ -144,6 +145,13 @@ export function TemplateLabScreen() {
     plan.problems.length === 0 &&
     simulationsValid(draft.simulations, maxSimulations)
 
+  const missing: string[] = []
+  if (!chosen) missing.push('Choose Datasets')
+  if (doc.root === null) missing.push('Build Template')
+  if (draft.simulations === null || draft.simulations < 1) missing.push('Enter Simulations')
+  else if (draft.simulations > maxSimulations) missing.push(`Simulations exceeds max (${fmt.int(maxSimulations)})`)
+  if (plan?.problems && plan.problems.length > 0) missing.push('Fix Template Issues')
+
   const add = useAddTask((count: number) =>
     templateLab.addTask({ ...previewBody, template_name: taskName, simulations: count }),
   )
@@ -254,10 +262,20 @@ export function TemplateLabScreen() {
                 ]}
               />
             )}
+            {missing.length > 0 && (
+              <div
+                id="add-task-blocked"
+                className="flex items-center gap-1.5 rounded-sm border border-pnl-negative-edge bg-pnl-negative-tint px-2.5 py-1 text-body-compact font-medium text-pnl-negative"
+              >
+                <CircleAlertIcon className="size-4 shrink-0" />
+                <span>Required: {missing.join(' • ')}</span>
+              </div>
+            )}
             <Button
               variant="primary"
               disabled={!ready}
               loading={add.isPending}
+              aria-describedby={missing.length > 0 ? 'add-task-blocked' : undefined}
               onClick={() => draft.simulations !== null && add.mutate(draft.simulations)}
             >
               <PlusIcon />
@@ -266,6 +284,17 @@ export function TemplateLabScreen() {
           </>
         }
       />
+      {missing.length > 0 && (
+        <div className="flex items-start gap-2.5 rounded-md border border-pnl-negative-edge bg-pnl-negative-tint p-3 text-pnl-negative">
+          <CircleAlertIcon className="size-4.5 mt-0.5 shrink-0 text-pnl-negative" />
+          <div className="flex flex-col gap-0.5">
+            <span className="font-semibold text-body">Required before generation:</span>
+            <span className="text-body-compact">
+              Please complete the red highlighted sections below ({missing.join(', ')}) to enable Add Task.
+            </span>
+          </div>
+        </div>
+      )}
       <Disclosure summary="Read more: How Formula Templates works & block builder guide">
         <div className="flex flex-col gap-2.5 text-body-compact text-ink-subtle">
           <p>

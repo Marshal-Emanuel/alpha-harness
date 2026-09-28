@@ -5,10 +5,11 @@
  */
 
 import { useQuery } from '@tanstack/react-query'
-import { PlayIcon } from 'lucide-react'
+import { CircleAlertIcon, PlayIcon } from 'lucide-react'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { today } from '@/api/core'
+import { fmt } from '@/lib/format'
 import {
   LAB_DEFAULTS,
   type LabDraft,
@@ -63,12 +64,12 @@ export function SearchLabScreen() {
     current &&
     plan.problems.length === 0 &&
     simulationsValid(draft.simulations, maxSimulations)
-  // What stops Run Task that no panel below already says.
-  const blocked = !chosen
-    ? 'Choose datasets to run.'
-    : draft.simulations === null
-      ? 'Enter the simulations to run.'
-      : null
+
+  const missing: string[] = []
+  if (!chosen) missing.push('Choose Datasets')
+  if (draft.simulations === null || draft.simulations < 1) missing.push('Enter Simulations')
+  else if (draft.simulations > maxSimulations) missing.push(`Simulations exceeds max (${fmt.int(maxSimulations)})`)
+  if (plan?.problems && plan.problems.length > 0) missing.push('Fix Plan Issues')
 
   return (
     <Page>
@@ -86,16 +87,20 @@ export function SearchLabScreen() {
         description="Offline algorithmic formula search. Combines mathematical operator trees and field candidates using Bayesian optimization (TPE) without requiring any external LLM or API keys."
         actions={
           <>
-            {blocked && (
-              <span id="run-task-blocked" className="text-body-compact text-ink-subtle">
-                {blocked}
-              </span>
+            {missing.length > 0 && (
+              <div
+                id="run-task-blocked"
+                className="flex items-center gap-1.5 rounded-sm border border-pnl-negative-edge bg-pnl-negative-tint px-2.5 py-1 text-body-compact font-medium text-pnl-negative"
+              >
+                <CircleAlertIcon className="size-4 shrink-0" />
+                <span>Required: {missing.join(' • ')}</span>
+              </div>
             )}
             <Button
               variant="primary"
               disabled={!ready}
               loading={add.isPending}
-              aria-describedby={blocked ? 'run-task-blocked' : undefined}
+              aria-describedby={missing.length > 0 ? 'run-task-blocked' : undefined}
               onClick={() => draft.simulations !== null && add.mutate(draft.simulations)}
             >
               <PlayIcon />
@@ -104,6 +109,17 @@ export function SearchLabScreen() {
           </>
         }
       />
+      {missing.length > 0 && (
+        <div className="flex items-start gap-2.5 rounded-md border border-pnl-negative-edge bg-pnl-negative-tint p-3 text-pnl-negative">
+          <CircleAlertIcon className="size-4.5 mt-0.5 shrink-0 text-pnl-negative" />
+          <div className="flex flex-col gap-0.5">
+            <span className="font-semibold text-body">Required before generation:</span>
+            <span className="text-body-compact">
+              Please complete the red highlighted sections below ({missing.join(', ')}) to enable Run Task.
+            </span>
+          </div>
+        </div>
+      )}
       <Disclosure summary="Read more: How Math Formula Search works & simulation guide">
         <div className="flex flex-col gap-2.5 text-body-compact text-ink-subtle">
           <p>

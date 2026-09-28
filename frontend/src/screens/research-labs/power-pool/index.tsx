@@ -1,7 +1,8 @@
 /** LLM Power Pool Lab: an LLM writes Power Pool Alphas for your datasets while the task runs in Tasks. */
 
 import { useQuery } from '@tanstack/react-query'
-import { PlusIcon } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { CircleAlertIcon, PlusIcon } from 'lucide-react'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { fmt } from '@/lib/format'
@@ -107,6 +108,14 @@ export function PowerPoolLabScreen() {
     plan.problems.length === 0 &&
     simulationsValid(draft.simulations, maxSimulations)
 
+  const missing: string[] = []
+  if (options.isSuccess && models.length === 0) missing.push('API Key Required')
+  else if (!model) missing.push('Select Model')
+  if (draft.datasetIds.length === 0) missing.push('Choose Datasets')
+  if (draft.simulations === null || draft.simulations < 1) missing.push('Enter Simulations')
+  else if (draft.simulations > maxSimulations) missing.push(`Simulations exceeds max (${fmt.int(maxSimulations)})`)
+  if (plan?.problems && plan.problems.length > 0) missing.push('Fix Plan Issues')
+
   return (
     <Page>
       <PageHeader
@@ -122,17 +131,40 @@ export function PowerPoolLabScreen() {
         }
         description="Autonomous quantitative strategy generator powered by frontier LLMs (Gemini / OpenAI). Uses financial reasoning and domain constraints to write novel alpha expressions."
         actions={
-          <Button
-            variant="primary"
-            disabled={!ready}
-            loading={add.isPending}
-            onClick={() => add.mutate()}
-          >
-            <PlusIcon />
-            Add Task
-          </Button>
+          <>
+            {missing.length > 0 && (
+              <div
+                id="add-task-blocked"
+                className="flex items-center gap-1.5 rounded-sm border border-pnl-negative-edge bg-pnl-negative-tint px-2.5 py-1 text-body-compact font-medium text-pnl-negative"
+              >
+                <CircleAlertIcon className="size-4 shrink-0" />
+                <span>Required: {missing.join(' • ')}</span>
+              </div>
+            )}
+            <Button
+              variant="primary"
+              disabled={!ready}
+              loading={add.isPending}
+              aria-describedby={missing.length > 0 ? 'add-task-blocked' : undefined}
+              onClick={() => add.mutate()}
+            >
+              <PlusIcon />
+              Add Task
+            </Button>
+          </>
         }
       />
+      {missing.length > 0 && (
+        <div className="flex items-start gap-2.5 rounded-md border border-pnl-negative-edge bg-pnl-negative-tint p-3 text-pnl-negative">
+          <CircleAlertIcon className="size-4.5 mt-0.5 shrink-0 text-pnl-negative" />
+          <div className="flex flex-col gap-0.5">
+            <span className="font-semibold text-body">Required before generation:</span>
+            <span className="text-body-compact">
+              Please complete the red highlighted sections below ({missing.join(', ')}) to enable Add Task.
+            </span>
+          </div>
+        </div>
+      )}
       <Disclosure summary="Read more: How AI Strategy Generator works & key requirements">
         <div className="flex flex-col gap-2.5 text-body-compact text-ink-subtle">
           <p>
@@ -156,7 +188,18 @@ export function PowerPoolLabScreen() {
       </Disclosure>
       {options.isError && <ErrorNotice error={options.error} title="Could not load the models" />}
       {options.isSuccess && models.length === 0 && (
-        <Notice tone="warn" title="Add a Key in LLM Integration to use this lab." />
+        <Notice
+          tone="error"
+          title="No LLM API Key Configured"
+          action={
+            <Button variant="secondary" size="sm" render={<Link to="/ai">Open LLM Integration</Link>}>
+              Add API Key
+            </Button>
+          }
+        >
+          An API key is required to generate alphas with an AI model. Add your Gemini or OpenAI API
+          key in Settings to unlock this generator.
+        </Notice>
       )}
       <DatasetsPanel
         ids={draft.datasetIds}
@@ -167,7 +210,16 @@ export function PowerPoolLabScreen() {
       <Panel title="Settings">
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap items-start gap-x-8 gap-y-4">
-            <Fieldset legend="Model">
+            <Fieldset
+              legend={
+                <div className="flex items-center gap-1.5">
+                  <span>Model</span>
+                  {!model && (
+                    <span className="text-caption font-semibold text-pnl-negative">(Required)</span>
+                  )}
+                </div>
+              }
+            >
               <Select
                 label="Model"
                 items={models.map((m) => ({

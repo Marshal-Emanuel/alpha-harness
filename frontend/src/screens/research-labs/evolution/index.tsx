@@ -6,9 +6,10 @@
 
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import { DnaIcon, ListChecksIcon, PlusIcon, WandSparklesIcon, XIcon } from 'lucide-react'
+import { CircleAlertIcon, DnaIcon, ListChecksIcon, PlusIcon, WandSparklesIcon, XIcon } from 'lucide-react'
 import { useEffect, useMemo } from 'react'
 import { ApiError } from '@/api/http'
+import { cn } from '@/lib/cn'
 import { DASH, fmt } from '@/lib/format'
 import { marketKey, useScopeOptions } from '@/lib/scope'
 import {
@@ -30,7 +31,6 @@ import {
   Badge,
   Button,
   Disclosure,
-  Empty,
   ErrorNotice,
   Fieldset,
   Metric,
@@ -192,6 +192,12 @@ export function EvolutionLabScreen() {
     plan.problems.length === 0 &&
     simulationsValid(simulations, maxSimulations)
 
+  const missing: string[] = []
+  if (!hasSeeds) missing.push('Choose Seed Alphas')
+  if (simulations === null || simulations < 1) missing.push('Enter Simulations')
+  else if (simulations > maxSimulations) missing.push(`Simulations exceeds max (${fmt.int(maxSimulations)})`)
+  if (plan?.problems && plan.problems.length > 0) missing.push('Fix Plan Issues')
+
   const columns: Column<SeedRow>[] = [
     {
       key: 'alpha',
@@ -264,17 +270,40 @@ export function EvolutionLabScreen() {
         }
         description="Breeds, splices, and mutates high-performing seed alphas using AST crossover and train/test fitness scoring to generate robust descendants."
         actions={
-          <Button
-            variant="primary"
-            disabled={!ready}
-            loading={add.isPending}
-            onClick={() => simulations !== null && add.mutate(simulations)}
-          >
-            <PlusIcon />
-            Add Task
-          </Button>
+          <>
+            {missing.length > 0 && (
+              <div
+                id="add-task-blocked"
+                className="flex items-center gap-1.5 rounded-sm border border-pnl-negative-edge bg-pnl-negative-tint px-2.5 py-1 text-body-compact font-medium text-pnl-negative"
+              >
+                <CircleAlertIcon className="size-4 shrink-0" />
+                <span>Required: {missing.join(' • ')}</span>
+              </div>
+            )}
+            <Button
+              variant="primary"
+              disabled={!ready}
+              loading={add.isPending}
+              aria-describedby={missing.length > 0 ? 'add-task-blocked' : undefined}
+              onClick={() => simulations !== null && add.mutate(simulations)}
+            >
+              <PlusIcon />
+              Add Task
+            </Button>
+          </>
         }
       />
+      {missing.length > 0 && (
+        <div className="flex items-start gap-2.5 rounded-md border border-pnl-negative-edge bg-pnl-negative-tint p-3 text-pnl-negative">
+          <CircleAlertIcon className="size-4.5 mt-0.5 shrink-0 text-pnl-negative" />
+          <div className="flex flex-col gap-0.5">
+            <span className="font-semibold text-body">Required before generation:</span>
+            <span className="text-body-compact">
+              Please complete the red highlighted sections below ({missing.join(', ')}) to enable Add Task.
+            </span>
+          </div>
+        </div>
+      )}
       <Disclosure summary="Read more: How Alpha Breeding & Genetic Evolution works">
         <div className="flex flex-col gap-2.5 text-body-compact text-ink-subtle">
           <p>
@@ -300,7 +329,17 @@ export function EvolutionLabScreen() {
         <ErrorNotice error={options.error} title="Could not load the lab's options" />
       )}
       <Panel
-        title="Seeds"
+        title={
+          <div className="flex items-center gap-2">
+            <span>Seeds</span>
+            {hasSeeds ? (
+              <Badge tone="neutral">{draft.seedIds.length} Selected</Badge>
+            ) : (
+              <Badge tone="loss">Required — 0 Selected</Badge>
+            )}
+          </div>
+        }
+        className={cn(!hasSeeds && 'border-pnl-negative-edge')}
         bodyClassName="flex flex-col gap-3"
         actions={
           <>
@@ -356,8 +395,13 @@ export function EvolutionLabScreen() {
           />
         ) : (
           !choosing && (
-            <Empty title="No seeds chosen" icon={<DnaIcon />}>
-              <div className="mt-2 flex flex-wrap justify-center gap-2">
+            <div className="flex flex-col items-center justify-center rounded-md border border-dashed border-pnl-negative-edge bg-pnl-negative-tint/15 p-6 text-center">
+              <DnaIcon className="size-8 text-pnl-negative mb-2" />
+              <p className="font-semibold text-body text-pnl-negative">No seed alphas selected</p>
+              <p className="mt-1 max-w-md text-body-compact text-pnl-negative/90">
+                You must select or auto-mine at least one seed Alpha from your vault to breed new expressions.
+              </p>
+              <div className="mt-3 flex flex-wrap justify-center gap-2">
                 <Button variant="primary" onClick={selectSeeds}>
                   <ListChecksIcon />
                   Select Seeds
@@ -367,7 +411,7 @@ export function EvolutionLabScreen() {
                   Auto Select
                 </Button>
               </div>
-            </Empty>
+            </div>
           )
         )}
         {found && found.seeds.length < found.wanted && (

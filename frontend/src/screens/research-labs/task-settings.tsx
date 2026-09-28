@@ -1,14 +1,15 @@
 /** The Datasets and Settings panels of a lab task, and the task settings every lab asks for. */
 
 import { DatabaseIcon, XIcon } from 'lucide-react'
+import { cn } from '@/lib/cn'
 import { DASH, fmt } from '@/lib/format'
 import { isRegionAgnostic, regionLabel, useScopeOptions } from '@/lib/scope'
 import { NeutralizationPicker } from '@/screens/research-labs/neutralization'
 import {
+  Badge,
   Button,
   Chips,
   Disclosure,
-  Empty,
   ErrorNotice,
   Fieldset,
   Input,
@@ -38,7 +39,7 @@ export function CoresSetting({
   )
 }
 
-/** Reports `null` while the field is empty. */
+/** Reports `null` while the field is empty. Turns red when missing or exceeding limit. */
 export function SimulationsSetting({
   value,
   max,
@@ -50,22 +51,65 @@ export function SimulationsSetting({
   placeholder?: string
   onChange: (simulations: number | null) => void
 }) {
+  const isMissing = value === null || value <= 0
+  const isOverMax = value !== null && value > max
+  const hasError = isMissing || isOverMax
+
   return (
-    <Fieldset legend="Simulations">
-      <Input
-        type="number"
-        min={1}
-        max={max}
-        step={1}
-        placeholder={placeholder}
-        aria-label="Simulations"
-        className="w-32"
-        value={value ?? ''}
-        onChange={(e) => {
-          const n = Number(e.target.value)
-          onChange(e.target.value === '' || !Number.isFinite(n) ? null : Math.max(0, Math.floor(n)))
-        }}
-      />
+    <Fieldset
+      legend={
+        <div className="flex items-center gap-1.5">
+          <span>Simulations</span>
+          {isMissing ? (
+            <span className="text-caption font-semibold text-pnl-negative">(Required)</span>
+          ) : isOverMax ? (
+            <span className="text-caption font-semibold text-pnl-negative">(Max {fmt.int(max)})</span>
+          ) : null}
+        </div>
+      }
+    >
+      <div className="flex flex-col gap-1.5">
+        <div className="flex flex-wrap items-center gap-2">
+          <Input
+            type="number"
+            min={1}
+            max={max}
+            step={1}
+            placeholder={placeholder ?? 'e.g. 500'}
+            aria-label="Simulations"
+            aria-invalid={hasError ? true : undefined}
+            className={cn('w-32', hasError && 'border-pnl-negative-edge bg-pnl-negative-tint/20 text-pnl-negative font-semibold')}
+            value={value ?? ''}
+            onChange={(e) => {
+              const n = Number(e.target.value)
+              onChange(e.target.value === '' || !Number.isFinite(n) ? null : Math.max(0, Math.floor(n)))
+            }}
+          />
+          <div className="flex items-center gap-1">
+            {[100, 500, 1000].map((preset) => (
+              <Button
+                key={preset}
+                size="sm"
+                variant={value === preset ? 'secondary' : 'ghost'}
+                onClick={() => onChange(preset)}
+                className={cn('h-8 text-xs', isMissing && 'border border-hairline-strong')}
+              >
+                {fmt.int(preset)}
+              </Button>
+            ))}
+          </div>
+        </div>
+        {isMissing && (
+          <span className="text-caption text-pnl-negative">
+            Required: enter simulations (1 - {fmt.int(max)}) or click a preset above.
+          </span>
+        )}
+        {isOverMax && (
+          <span className="text-caption text-pnl-negative">
+            Exceeds maximum available simulations ({fmt.int(max)}).
+          </span>
+        )}
+      </div>
     </Fieldset>
   )
 }
@@ -94,7 +138,17 @@ export function DatasetsPanel({
   const chosen = ids.length > 0
   return (
     <Panel
-      title="Datasets"
+      title={
+        <div className="flex items-center gap-2">
+          <span>Datasets</span>
+          {chosen ? (
+            <Badge tone="neutral">{ids.length} Selected</Badge>
+          ) : (
+            <Badge tone="loss">Required — 0 Selected</Badge>
+          )}
+        </div>
+      }
+      className={cn(!chosen && 'border-pnl-negative-edge')}
       actions={
         chosen && (
           <Button size="sm" onClick={onChoose}>
@@ -125,12 +179,17 @@ export function DatasetsPanel({
           ))}
         </div>
       ) : (
-        <Empty title="No datasets chosen" icon={<DatabaseIcon />}>
-          <Button className="mt-2" onClick={onChoose}>
+        <div className="flex flex-col items-center justify-center rounded-md border border-dashed border-pnl-negative-edge bg-pnl-negative-tint/15 p-6 text-center">
+          <DatabaseIcon className="size-8 text-pnl-negative mb-2" />
+          <p className="font-semibold text-body text-pnl-negative">No datasets selected</p>
+          <p className="mt-1 max-w-md text-body-compact text-pnl-negative/90">
+            You must choose at least one dataset before running simulations.
+          </p>
+          <Button variant="primary" className="mt-3" onClick={onChoose}>
             <DatabaseIcon />
             Choose Datasets
           </Button>
-        </Empty>
+        </div>
       )}
     </Panel>
   )
